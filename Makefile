@@ -23,20 +23,20 @@ LIBS = -lgcc
 all: $(DEFAULT) 
 
 install: all
-	rpi-install $(TTY) $(DEFAULT)
+    rpi-install $(TTY) $(DEFAULT)
 
 %.o: %.c
-	$(ARM)-gcc $(CFLAGS) -c -o $@ $^
+    $(ARM)-gcc $(CFLAGS) -c -o $@ $^
 
 %.o: %.s
-	$(AS) $^ -o $@
+    $(AS) $^ -o $@
 
 %.elf: $(LIB_OBJS) %.o
-	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
-	$(OD) -D $@ > $@.list
+    $(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
+    $(OD) -D $@ > $@.list
 
 %.bin: %.elf
-	$(OCP) -O binary $^ $@
+    $(OCP) -O binary $^ $@
 
 clean:
-	rm -f *.bin *.elf *.list *~ *.o \#*
+    rm -f *.bin *.elf *.list *~ *.o \#*
