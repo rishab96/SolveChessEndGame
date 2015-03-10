@@ -14,7 +14,7 @@ DEFAULT = battleship.bin
 LIB_OBJS = start.o cstart.o helpers.o led.o fb.o gfx.o font.o
 CFLAGS  = -g -ffreestanding -nostdlib -nostartfiles -O0 -std=c99
 LDFLAGS = -T memmap
-LDFLAGS += -L/home/rpi/bin/arm-none-eabi/lib/gcc/arm-none-eabi/4.8.3
+LDFLAGS += -L/Users/zackherbst/bin/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/4.8.3/
 
 LIBS = -lgcc
 
@@ -23,20 +23,20 @@ LIBS = -lgcc
 all: $(DEFAULT) 
 
 install: all
-    rpi-install $(TTY) $(DEFAULT)
+	rpi-install $(TTY) $(DEFAULT)
 
 %.o: %.c
-    $(ARM)-gcc $(CFLAGS) -c -o $@ $^
+	$(ARM)-gcc $(CFLAGS) -c -o $@ $^
 
 %.o: %.s
-    $(AS) $^ -o $@
+	$(AS) $^ -o $@
 
 %.elf: $(LIB_OBJS) %.o
-    $(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
-    $(OD) -D $@ > $@.list
+	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
+	$(OD) -D $@ > $@.list
 
 %.bin: %.elf
-    $(OCP) -O binary $^ $@
+	$(OCP) -O binary $^ $@
 
 clean:
-    rm -f *.bin *.elf *.list *~ *.o \#*
+	rm -f *.bin *.elf *.list *~ *.o \#*
