@@ -29,7 +29,9 @@ void notmain() {
 }
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y){
-	int i;
+	//add the dimensions to screen
+    draw_dimensions();
+    int i;
 	for(i = 0; i <= ncol; ++i){
 		gfx_draw_line(0xFFFFFFFF, x+i*width, x+i*width, y, y+height*nrow, 0);
 	}
@@ -72,8 +74,22 @@ void fire(int row, int col) {
     
     gfx_draw_line(red, start_x, end_x, start_y, end_y, 0);
 
-    //draw second half of X
+    //draw second half of X, this part is not working!!! wtf
     volatile int new_start_y = start_y + TILE_SIZE;
     volatile int new_end_y = end_y - TILE_SIZE;
     gfx_draw_line(red, start_x, end_x, new_start_y, new_end_y, 0);
+}
+
+void draw_dimensions() {
+    //draw left corner
+    gfx_draw_letter(FIELD_COLOR, START_POS/2, START_POS, '1');
+    gfx_draw_letter(FIELD_COLOR, 3*START_POS/2, START_POS/2, '1');
+    
+    //draw other corners
+    gfx_draw_letter(FIELD_COLOR, START_POS/2 + TILE_SIZE *NUM_ROWS, START_POS/2, 'C');
+    gfx_draw_letter(FIELD_COLOR, START_POS/2,  START_POS/2 + TILE_SIZE *NUM_COLS, 'C');
+    gfx_draw_letter(FIELD_COLOR, 3*START_POS/2 + TILE_SIZE *NUM_ROWS, 3*START_POS/2, '1');
+    gfx_draw_letter(FIELD_COLOR, 3*START_POS/2,  3*START_POS/2 + TILE_SIZE *NUM_COLS, '1');
+    gfx_draw_letter(FIELD_COLOR, START_POS/2 + TILE_SIZE*NUM_ROWS,  3*START_POS/2 + TILE_SIZE *    NUM_COLS, 'C');
+    gfx_draw_letter(FIELD_COLOR, 3*START_POS/2 + TILE_SIZE*NUM_ROWS,  START_POS/2 + TILE_SIZE * NUM_COLS, 'C');
 }
