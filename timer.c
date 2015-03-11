@@ -1,30 +1,67 @@
-#ifndef SYSTEM_H_INCLUDED
-#define SYSTEM_H_INCLUDED
-
-/* Commmon low-level helper functions (dwelch assembly routines)
- * and core processor operations.
+/* Hardware abstraction functions for a Raspberry Pi timer.
  * Author: Philip Levis <pal@cs.stanford.edu>
  * Date: August 14 2014
  */ 
 
-/* Implemented in helpers.s */
-extern void PUT32 ( unsigned int, unsigned int );
-extern void PUT16 ( unsigned int, unsigned int );
-extern void PUT8 ( unsigned int, unsigned int );
-extern unsigned int GET32 ( unsigned int );
-extern unsigned int GETPC ( void );
-extern void BRANCHTO ( unsigned int );
-extern void dummy ( unsigned int );
+#include "system.h"
+#include "timer.h"
 
-/* Implemented in system.c */
-void system_enable_interrupts();
-void system_disable_interrupts();
-void system_enable_caches();
-void system_enable_branch_prediction();
-void system_memory_read_barrier();
-void system_memory_write_barrier();
+#define ARM_TIMER_LOD 0x2000B400
+#define ARM_TIMER_VAL 0x2000B404
+#define ARM_TIMER_CTL 0x2000B408
+#define ARM_TIMER_DIV 0x2000B41C
+#define ARM_TIMER_CNT 0x2000B420
 
-#endif
+static char has_fired_;
+static unsigned int last_firing_;
+
+/* The ARM timer is 250MHz; prescale by 250 to get
+   a 1MHz clock. */
+void timer_init() {
+  has_fired_ = 0;
+  last_firing_ = 0;
+  // Disable free-running counter, set prescalar to 250 (F9)
+  PUT32(ARM_TIMER_CTL,0x00F90000);
+  // Re-enable free-running counter, set prescalar to 250 (F9)
+  PUT32(ARM_TIMER_CTL,0x00F90200);  
+}
+
+unsigned int timer_gettime() {
+  return GET32(ARM_TIMER_CNT);
+}
+
+void timer_wait_until(unsigned int time) {
+  while (timer_gettime() != time) {
+    // Do nothing;
+  }
+  has_fired_ = 1;
+  last_firing_ = timer_gettime();
+}
+
+void timer_wait_for(unsigned int microseconds) {
+  unsigned int current = timer_gettime();
+  while ((timer_gettime() - current) < microseconds) {
+    // do nothing
+  }
+  has_fired_ = 1;
+  last_firing_ = timer_gettime();
+}
+
+void timer_wait_interval(unsigned int microseconds) {
+  if (!has_fired_) {
+    timer_wait_for(microseconds);
+  } else {
+    unsigned int stop = last_firing_ + microseconds;
+    unsigned int remaining = stop - timer_gettime();
+    // We've already passed the interval, just fire
+    if (remaining > microseconds) {
+      last_firing_ = timer_gettime();
+      return;
+    } else {
+      timer_wait_for(remaining);
+    }
+  }
+}
 
 /*
  * Copyright (c) 2014 Stanford University.

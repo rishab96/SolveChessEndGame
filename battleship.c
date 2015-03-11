@@ -1,3 +1,9 @@
+#include "system.h"
+#include "timer.h"
+#include "gpio.h"
+#include "fb.h"
+#include "keyboard.h"
+#include "buffer.h"
 #include "gfx.h"
 #include "font.h"
 
@@ -9,23 +15,48 @@
 #define SHIP_SPACE 10
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y);
- void add_battleship(int start_row, int start_col, int end_row, int end_col);
- void fire(int row, int col);
+void add_battleship(int start_row, int start_col, int end_row, int end_col);
+void fire(int row, int col);
+void draw_dimensions();
+void fieldInit();
 
 void notmain() {
-	gfx_init();
-	gfx_set_double_buffered(0);
+	fieldInit();
 	unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;
 	y += 2*font_height();
 	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
-    add_battleship(3,3,3,7);
-    add_battleship(8,8,11,8);
-    fire(1,1);
-    fire(2,2);
-    fire(3,3);
-    fire(5,7);
-    fire(9,9);
+	int corners[4];
+	int i;
+	for(i = 0; i < 4; ++i){
+		while(1){
+			char c;
+			if(keyboard_has_char()){
+				c = keyboard_read_char();
+				gfx_draw_letter(white, 0, 0, c);
+				if(c >= 97){
+					corners[i] = c - 'a' + 10;
+				}
+				else{
+					corners[i] = c - '0';
+				}
+				if(corners[i] >= 0 && corners[i] <= 0xC)
+					break;
+			}
+		}
+	}
+	add_battleship(corners[0], corners[1], corners[2], corners[3]);
+}
+
+void fieldInit(){
+  gpio_init();
+  led_init();
+  timer_init();
+  fb_init();
+  keyboard_init();
+  gfx_init();
+  system_enable_interrupts();
+	gfx_set_double_buffered(0);
 }
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y){

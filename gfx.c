@@ -75,11 +75,14 @@ unsigned int gfx_draw_letter(unsigned int color,
 	char buffer[buflen];
 	font_ascii(letter, buffer, buflen);
 	unsigned int (*pixels)[width] = (unsigned int (*)[width])buffer;
-	for(unsigned int yval = 0; yval < font_height(); ++yval){
-		for(unsigned int xval = 0; xval < font_width(); ++xval){
+	unsigned int yval;
+	for(yval = 0; yval < font_height(); ++yval){
+		unsigned int xval;
+		for(xval = 0; xval < font_width(); ++xval){
 			unsigned int pixelval = pixels[yval][xval];
 			unsigned int rgb[3];
-			for(int i = 0; i < 3; ++i){
+			int i;
+			for(i = 0; i < 3; ++i){
 				rgb[i] = (pixelval >> (i*8)) & 0xFF;
 				rgb[i] *= (color >> (i*8)) & 0xFF;
 				rgb[i] = rgb[i] >> 8;

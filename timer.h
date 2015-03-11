@@ -1,28 +1,16 @@
-#ifndef SYSTEM_H_INCLUDED
-#define SYSTEM_H_INCLUDED
+#ifndef TIMER_H_INCLUDED
+#define TIMER_H_INCLUDED
 
-/* Commmon low-level helper functions (dwelch assembly routines)
- * and core processor operations.
+/* Hardware abstraction functions for a Raspberry Pi timer.
  * Author: Philip Levis <pal@cs.stanford.edu>
  * Date: August 14 2014
  */ 
 
-/* Implemented in helpers.s */
-extern void PUT32 ( unsigned int, unsigned int );
-extern void PUT16 ( unsigned int, unsigned int );
-extern void PUT8 ( unsigned int, unsigned int );
-extern unsigned int GET32 ( unsigned int );
-extern unsigned int GETPC ( void );
-extern void BRANCHTO ( unsigned int );
-extern void dummy ( unsigned int );
-
-/* Implemented in system.c */
-void system_enable_interrupts();
-void system_disable_interrupts();
-void system_enable_caches();
-void system_enable_branch_prediction();
-void system_memory_read_barrier();
-void system_memory_write_barrier();
+void timer_init();
+unsigned int timer_gettime();
+void timer_wait_until(unsigned int time);
+void timer_wait_for(unsigned int microseconds);
+void timer_wait_interval(unsigned int microseconds);
 
 #endif
 

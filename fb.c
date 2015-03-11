@@ -111,7 +111,8 @@ const char * fb_display(){
 
 void fb_clear(){
 	unsigned int * buffer = (unsigned int *) fb_writeable_buffer();
-	for(int i = 0; i < (fb_width() * fb_height()); ++i){
+	int i;
+	for(i = 0; i < (fb_width() * fb_height()); ++i){
 		buffer[i] = 0x00000000;
 	}
 }

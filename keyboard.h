@@ -1,30 +1,23 @@
-#ifndef SYSTEM_H_INCLUDED
-#define SYSTEM_H_INCLUDED
+#ifndef KEYBOARD_H_INCLUDED
+#define KEYBOARD_H_INCLUDED
 
-/* Commmon low-level helper functions (dwelch assembly routines)
- * and core processor operations.
- * Author: Philip Levis <pal@cs.stanford.edu>
- * Date: August 14 2014
- */ 
+/* Initialize the keyboard driver.
+   This should set up the keyboard GPIO pins and enable GPIO interrupts
+   for them. It should not enable global interrupts.*/
+void keyboard_init();
 
-/* Implemented in helpers.s */
-extern void PUT32 ( unsigned int, unsigned int );
-extern void PUT16 ( unsigned int, unsigned int );
-extern void PUT8 ( unsigned int, unsigned int );
-extern unsigned int GET32 ( unsigned int );
-extern unsigned int GETPC ( void );
-extern void BRANCHTO ( unsigned int );
-extern void dummy ( unsigned int );
+/* Return 1 if there are characters to read, 0 if no characters to read. */
+unsigned keyboard_has_char();
 
-/* Implemented in system.c */
-void system_enable_interrupts();
-void system_disable_interrupts();
-void system_enable_caches();
-void system_enable_branch_prediction();
-void system_memory_read_barrier();
-void system_memory_write_barrier();
+/* Return the next ASCII character pressed. If keyboard_has_chars() is
+   false, the return value of this function is undefined. This call does
+   not block. */
+char keyboard_read_char();
+
+void int_handler(unsigned int pc);
 
 #endif
+
 
 /*
  * Copyright (c) 2014 Stanford University.
@@ -55,4 +48,7 @@ void system_memory_write_barrier();
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Author: Philip Levis <pal@cs.stanford.edu>
+ * Date: 9/26/2014
  */
