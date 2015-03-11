@@ -28,24 +28,31 @@ void notmain() {
 	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
 	int corners[4];
 	int i;
-	for(i = 0; i < 4; ++i){
-		while(1){
-			char c;
-			if(keyboard_has_char()){
-				c = keyboard_read_char();
-				gfx_draw_letter(white, 0, 0, c);
-				if(c >= 97){
-					corners[i] = c - 'a' + 10;
+	while(1){
+		gfx_draw_string(white, 700, 0, "Input battleship corner");
+		for(i = 0; i < 4; ++i){
+			while(1){
+				char c;
+				if(keyboard_has_char()){
+					c = keyboard_read_char();
+					gfx_draw_letter(white, 700, (i+1)*font_height(), c);
+					if(c >= 97){
+						corners[i] = c - 'a' + 10;
+					}
+					else{
+						corners[i] = c - '0';
+					}
+					if(corners[i] >= 0 && corners[i] <= 0xC)
+						break;
 				}
-				else{
-					corners[i] = c - '0';
-				}
-				if(corners[i] >= 0 && corners[i] <= 0xC)
-					break;
 			}
 		}
+		gfx_draw_string(white, 700, 0, "                                ");
+		for(i = 0; i < 4; ++i){
+			gfx_draw_letter(white, 700, (i+1)*font_height(), ' ');
+		}
+		add_battleship(corners[0], corners[1], corners[2], corners[3]);
 	}
-	add_battleship(corners[0], corners[1], corners[2], corners[3]);
 }
 
 void fieldInit(){
