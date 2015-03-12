@@ -13,6 +13,7 @@
 #define TILE_SIZE 50
 #define START_POS 50
 #define SHIP_SPACE 10
+#define FLASH_TIME 500000
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y);
 void add_battleship(int start_row, int start_col, int end_row, int end_col);
@@ -22,13 +23,38 @@ void fieldInit();
 
 void notmain() {
 	fieldInit();
-	unsigned int white = gfx_compute_color(128, 128, 128);
+	unsigned int value = 1;
+	gpio_set_output(21);
+	gpio_set_input(20);
+	gpio_pin_write(21, 1);
+	while(1){
+		if(gpio_pin_read(20) == 1){
+			led_on();
+		}
+		else{
+			led_off();
+		}
+/*		if(keyboard_has_char()){
+			unsigned int scancode = remove();
+			int i;
+			for(i = 0; i < 8; ++i){
+				int value = scancode & 1;
+				gpio_pin_write(21, value);
+				timer_wait_for(FLASH_TIME);
+				scancode = scancode>>1;
+			}
+		}*/
+	}
+/*	unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;
 	y += 2*font_height();
 	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
 	int corners[4];
 	int i;
 	while(1){
+		//TODO: have fixed sizes for the ships
+		//Scoring
+		//Firing
 		gfx_draw_string(white, 700, 0, "Input battleship corner");
 		for(i = 0; i < 4; ++i){
 			while(1){
@@ -52,7 +78,7 @@ void notmain() {
 			gfx_draw_letter(white, 700, (i+1)*font_height(), ' ');
 		}
 		add_battleship(corners[0], corners[1], corners[2], corners[3]);
-	}
+	}*/
 }
 
 void fieldInit(){

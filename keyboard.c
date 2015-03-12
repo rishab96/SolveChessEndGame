@@ -57,10 +57,9 @@ void keyboard_init() {
 
 void int_handler(unsigned int pc){
   gpio_check_and_clear_event(GPIO_PIN23);
-  led_toggle();
   if(status){
 		if(count < 8){
-	    pinval |= gpio_pin_read(24)<<count;
+	    pinval |= (gpio_pin_read(24))<<count;
 		}
 		else
 			gpio_pin_read(24);
