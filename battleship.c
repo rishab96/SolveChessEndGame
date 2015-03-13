@@ -33,7 +33,8 @@ void ask_to_fire();
 
 void notmain() {
 	fieldInit();
-	unsigned int value = 1;
+	//play_game();
+    unsigned int value = 1;
 	gpio_set_output(21);
 	gpio_set_output(20);
 	gpio_pin_write(21, 1);
@@ -62,8 +63,11 @@ void notmain() {
 				gpio_pin_write(21, 1);
 				gpio_pin_write(20, 1);
 			}
-			timer_wait_for(50000);
+			timer_wait_for(FLASH_TIME/5);
 			gpio_pin_write(20, 1);
+            remove();
+            remove();
+            
 		}
 	}
 	/*unsigned int white = gfx_compute_color(128, 128, 128);
@@ -85,14 +89,14 @@ void play_game() {
         int current_score = get_score();
         //check if hit, and alert user on result
         if(current_score == MAX_SCORE) {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "you win!");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "you lost!   ");
             over = 1;
         }
         else if(current_score > previous_score) {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "you hit!");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "they hit!   ");
         }
         else {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "missed! ");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "they missed!  ");
         }
         //update score
         previous_score = current_score;
