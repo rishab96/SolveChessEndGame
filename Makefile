@@ -15,7 +15,7 @@ LIB_OBJS = start.o cstart.o helpers.o led.o gpio.o timer.o system.o gprof.o
 LIB_OBJS += fb.o keyboard.o interrupts_asm.o handlers.o gfx.o font.o buffer.o
 CFLAGS  = -g -ffreestanding -nostdlib -nostartfiles -O0
 LDFLAGS = -T memmap
-LDFLAGS += -L/Users/zackherbst/bin/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/4.8.3/
+LDFLAGS += -L/home/rpi/bin/arm-none-eabi/lib/gcc/arm-none-eabi/4.8.3
 
 LIBS = -lgcc
 

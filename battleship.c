@@ -33,32 +33,43 @@ void ask_to_fire();
 
 void notmain() {
 	fieldInit();
-    /*
 	unsigned int value = 1;
 	gpio_set_output(21);
-	gpio_set_input(20);
+	gpio_set_output(20);
 	gpio_pin_write(21, 1);
+	gpio_pin_write(20, 1);
 	while(1){
-		if(gpio_pin_read(20) == 1){
-			led_on();
-		}
-		else{
-			led_off();
-		}*		if(keyboard_has_char()){
+		if(keyboard_has_char()){
 			unsigned int scancode = remove();
 			int i;
+			//Write start bit
+			gpio_pin_write(20, 0);
+			gpio_pin_write(21, 0);
+			timer_wait_for(50000);
+			gpio_pin_write(20, 1);
 			for(i = 0; i < 8; ++i){
+				gpio_pin_write(20, 0);
 				int value = scancode & 1;
 				gpio_pin_write(21, value);
-				timer_wait_for(FLASH_TIME);
 				scancode = scancode>>1;
+				timer_wait_for(50000);
+				gpio_pin_write(20, 1);
 			}
-		}*/
-	//} 
-	unsigned int white = gfx_compute_color(128, 128, 128);
+			//Write parity (garbage) & end bit
+			int j;
+			for(j = 0; j < 2; ++j){
+				gpio_pin_write(20, 0);
+				gpio_pin_write(21, 1);
+				gpio_pin_write(20, 1);
+			}
+			timer_wait_for(50000);
+			gpio_pin_write(20, 1);
+		}
+	}
+	/*unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;
 	y += 2*font_height();
-	play_game();
+	play_game();*/
 }
 
 void play_game() {

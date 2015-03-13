@@ -56,6 +56,7 @@ void keyboard_init() {
 }
 
 void int_handler(unsigned int pc){
+	//Check the events from the 23rd pin
   gpio_check_and_clear_event(GPIO_PIN23);
   if(status){
 		if(count < 8){
@@ -74,6 +75,7 @@ void int_handler(unsigned int pc){
   if(count == 0 && gpio_pin_read(24) == 0){
     status = 1;
   }
+	//Also check pins 20 & 21
 }
 
 /* Return 1 if there are characters to read, 0 if no characters to read.
