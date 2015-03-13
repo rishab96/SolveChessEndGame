@@ -14,15 +14,26 @@
 #define START_POS 50
 #define SHIP_SPACE 10
 #define FLASH_TIME 500000
+#define MAX_SCORE 14
+
+//holds the grid of ships
+int field[144];
+//holds the locations fired
+int fired[144];
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y);
 void add_battleship(int start_row, int start_col, int end_row, int end_col);
 void fire(int row, int col);
 void draw_dimensions();
 void fieldInit();
+void add_ships();
+void ask_for_ship(int size);
+void play_game();
+void ask_to_fire();
 
 void notmain() {
 	fieldInit();
+    /*
 	unsigned int value = 1;
 	gpio_set_output(21);
 	gpio_set_input(20);
@@ -33,8 +44,7 @@ void notmain() {
 		}
 		else{
 			led_off();
-		}
-/*		if(keyboard_has_char()){
+		}*		if(keyboard_has_char()){
 			unsigned int scancode = remove();
 			int i;
 			for(i = 0; i < 8; ++i){
@@ -44,43 +54,72 @@ void notmain() {
 				scancode = scancode>>1;
 			}
 		}*/
-	}
-/*	unsigned int white = gfx_compute_color(128, 128, 128);
+	//} 
+	unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;
 	y += 2*font_height();
 	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
-	int corners[4];
-	int i;
-	while(1){
-		//TODO: have fixed sizes for the ships
-		//Scoring
-		//Firing
-		gfx_draw_string(white, 700, 0, "Input battleship corner");
-		for(i = 0; i < 4; ++i){
-			while(1){
-				char c;
-				if(keyboard_has_char()){
-					c = keyboard_read_char();
-					gfx_draw_letter(white, 700, (i+1)*font_height(), c);
-					if(c >= 97){
-						corners[i] = c - 'a' + 10;
-					}
-					else{
-						corners[i] = c - '0';
-					}
-					if(corners[i] >= 0 && corners[i] <= 0xC)
-						break;
-				}
-			}
-		}
-		gfx_draw_string(white, 700, 0, "                                ");
-		for(i = 0; i < 4; ++i){
-			gfx_draw_letter(white, 700, (i+1)*font_height(), ' ');
-		}
-		add_battleship(corners[0], corners[1], corners[2], corners[3]);
-	}*/
+	play_game();
 }
 
+void play_game() {
+    add_ships();
+    //clear
+    int i=0;
+     for(i = 0; i < 4; ++i){
+            gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), ' ');
+    }
+    //ask to fire
+    int over = 0;
+    int previous_score = 0;
+    while(!over) {
+        ask_to_fire();
+        int current_score = get_score();
+        if(current_score == MAX_SCORE) {
+            gfx_draw_string(FIELD_COLOR, 700, 500, "you win!");
+            over = true;
+        }
+        else if(current_score > previous_score) {
+            gfx_draw_string(FIELD_COLOR, 700, 500, "you hit!");
+        }
+        else {
+            gfx_draw_string(FIELD_COLOR, 700, 500, "missed! ");
+        }
+        previous_score = current_score;
+  }
+}
+
+void ask_to_fire() {
+       gfx_draw_string(FIELD_COLOR, 700, 0, "Where to fire?")    ; 
+        int corners[4];
+        int i=0;
+        for(i = 0; i < 2; ++i){
+            while(1){
+                char c;
+                if(keyboard_has_char()){
+                    c = keyboard_read_char();
+                    gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), c);
+                    if(c >= 97){
+                        corners[i] = c - 'a' + 10;
+                    }
+                    else{
+                        corners[i] = c - '0';
+                    }
+                    if(corners[i] >= 0 && corners[i] <= 0xC)
+                        break;
+                }
+            }
+      } 
+    //fire at this location
+      fire(corners[0], corners[1]);
+    //set the fired location to true
+    fired[corners[0] * NUM_COLS + corners[1]] = 1;
+    //clear
+    for(i = 0; i < 4; ++i){
+          gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), ' ');
+    }
+    
+}
 void fieldInit(){
   gpio_init();
   led_init();
@@ -90,6 +129,13 @@ void fieldInit(){
   gfx_init();
   system_enable_interrupts();
 	gfx_set_double_buffered(0);
+
+    //fill field and fires with 0s
+    int i;
+    for(i=0; i < 143; i++) {
+        field[i] = 0;
+        fired[i] = 0;
+    }
 }
 
 void drawField(int nrow, int ncol, int width, int height, int x, int y){
@@ -105,6 +151,70 @@ void drawField(int nrow, int ncol, int width, int height, int x, int y){
 	}
 }
 
+void ask_for_ship(int size) {
+        int corners[4];
+        int i=0;
+        for(i = 0; i < 2; ++i){
+            while(1){
+                char c;
+                if(keyboard_has_char()){
+                    c = keyboard_read_char();
+                    gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), c);
+                    if(c >= 97){
+                        corners[i] = c - 'a' + 10;
+                    }
+                    else{
+                        corners[i] = c - '0';
+                    }
+                    if(corners[i] >= 0 && corners[i] <= 0xC)
+                        break;
+                }
+            }
+        }gfx_draw_string(FIELD_COLOR, 700, 0, "vert(v) or hor(h)?");
+        int horizontal = 0;
+        int vertical = 0;
+        while(1) {
+            char c1;
+            if(keyboard_has_char()) {
+                c1 = keyboard_read_char();
+			    if(c1 == 'h') {
+                    horizontal = 1;
+                }
+                else if(c1 == 'v') { 
+                    vertical = 1;
+                }
+                if(horizontal ==1 || vertical ==1) {
+                    break;
+                }
+            }    
+        }
+        if(horizontal) {
+            add_battleship(corners[0], corners[1], corners[0], corners[1]+size);
+    }
+    else {
+        add_battleship(corners[0], corners[1], corners[0]+size, corners[1]);
+    }  
+    //clear
+    for(i = 0; i < 4; ++i){
+            gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), ' ');
+    }
+        
+}
+//asks the user to put in the 4 starting ships
+void add_ships() {
+        int ships_to_place[4] = {5,4,3,2};
+        //ask for 1st ship
+		gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 5?");
+            //wait for valid input
+        ask_for_ship(ships_to_place[0]);
+        gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 4?");
+        ask_for_ship(ships_to_place[1]);
+        gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 3?")    ;
+        ask_for_ship(ships_to_place[2]);
+        gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 2?")        ;
+        ask_for_ship(ships_to_place[3]);
+}
+
 //adds a battleship to the field
 void add_battleship(int start_row, int start_col, int end_row, int end_col) {
     volatile int start_x = START_POS + (start_col * TILE_SIZE) + SHIP_SPACE;
@@ -115,10 +225,18 @@ void add_battleship(int start_row, int start_col, int end_row, int end_col) {
     if(start_row == end_row) {
         end_x = start_x + (end_col-start_col) * TILE_SIZE - 2*SHIP_SPACE;
         end_y = start_y + TILE_SIZE - 2*SHIP_SPACE;
+        int pos;
+        for(pos = start_col; pos <= end_col; pos++) {
+            field[start_row*NUM_COLS + pos] = 1;
+        } 
     }
     else {
         end_x = start_x + TILE_SIZE - 2*SHIP_SPACE;
         end_y = start_y + (end_row-start_row) * TILE_SIZE - 2*SHIP_SPACE;
+        int pos;
+        for(pos= start_row; pos <= end_row; pos++) {
+            field[pos*NUM_COLS + start_col] = 1;
+        }
     }
     
     int width = end_x - start_x;
@@ -138,12 +256,24 @@ void fire(int row, int col) {
     
     gfx_draw_line(red, start_x, end_x, start_y, end_y, 0);
 
-    //draw second half of X, this part is not working!!! wtf
     volatile int new_start_y = start_y + TILE_SIZE;
     volatile int new_end_y = end_y - TILE_SIZE;
     gfx_draw_line(red, start_x, end_x, new_start_y, new_end_y, 0);
 }
 
+//gets your score
+int get_score() {
+    int i;
+    int score = 0;    
+    for(i=0; i < 144; i++) {
+        int val = field[i];
+        int fire = fired[i];
+        if(val && fire) {
+            score++;
+            }
+        }
+    return score;
+}
 void draw_dimensions() {
     //draw left corner
     gfx_draw_letter(FIELD_COLOR, START_POS/2, START_POS, '1');
