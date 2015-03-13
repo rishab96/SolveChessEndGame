@@ -58,26 +58,24 @@ void notmain() {
 	unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;
 	y += 2*font_height();
-	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
 	play_game();
 }
 
 void play_game() {
+    //draw grid and ask fro ships
+	drawField(NUM_COLS, NUM_ROWS, TILE_SIZE, TILE_SIZE, START_POS, START_POS);
     add_ships();
-    //clear
-    int i=0;
-     for(i = 0; i < 4; ++i){
-            gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), ' ');
-    }
-    //ask to fire
     int over = 0;
     int previous_score = 0;
+    //play the game until max score reached
     while(!over) {
+        //fire
         ask_to_fire();
         int current_score = get_score();
+        //check if hit, and alert user on result
         if(current_score == MAX_SCORE) {
             gfx_draw_string(FIELD_COLOR, 700, 500, "you win!");
-            over = true;
+            over = 1;
         }
         else if(current_score > previous_score) {
             gfx_draw_string(FIELD_COLOR, 700, 500, "you hit!");
@@ -85,10 +83,12 @@ void play_game() {
         else {
             gfx_draw_string(FIELD_COLOR, 700, 500, "missed! ");
         }
+        //update score
         previous_score = current_score;
   }
 }
 
+//methods asks the user where to fire
 void ask_to_fire() {
        gfx_draw_string(FIELD_COLOR, 700, 0, "Where to fire?")    ; 
         int corners[4];
