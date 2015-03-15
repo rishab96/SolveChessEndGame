@@ -36,9 +36,12 @@ void notmain() {
 	//Display the codes received
 	gpio_set_input(22);
     gpio_set_input(27);
-    while(1) {
+    while(1){
+        gfx_draw_letter(0xFFFFFFFF, 200,200,' ');
         if(!gpio_pin_read(27) && !gpio_pin_read(22)) {
-            gfx_draw_letter(0xFFFFFFFF, 200,200,'s'); 
+            gfx_draw_letter(0xFFFFFFFF, 200,200,'s');
+            gfx_draw_string(0xFFFFFFFF,250,275, "                         ");
+            gfx_draw_string(0xFFFFFFFF,250,250, "                         ")    ;
             int scan_code = 0;
             int multiplier = 1;
             int previous = 1;
@@ -63,7 +66,7 @@ void notmain() {
             }
             char c = get_char(scan_code);
             gfx_draw_letter(0xFFFFFFFF, 350,350,c);
-                    
+            timer_wait_for(FLASH_TIME*10);
             //go off on clock
             
         }

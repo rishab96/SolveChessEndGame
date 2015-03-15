@@ -66,7 +66,7 @@ void int_handler(unsigned int pc){
 		else
 			gpio_pin_read(24);
 		++count;
-        gfx_draw_letter(0xFFFFFFFF, 250+count*font_width(),250, '0' +gpio_pin_read(24)); 
+//        gfx_draw_letter(0xFFFFFFFF, 250+count*font_width(),250, '0' +gpio_pin_read(24)); 
 		if(count == 9){
 			insert(pinval);
 			count = 0;
