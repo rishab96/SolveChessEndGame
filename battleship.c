@@ -13,7 +13,7 @@
 #define TILE_SIZE 50
 #define START_POS 50
 #define SHIP_SPACE 10
-#define FLASH_TIME 500000
+#define FLASH_TIME 100000
 #define MAX_SCORE 14
 #define CLOCK 17
 #define DATA 12
