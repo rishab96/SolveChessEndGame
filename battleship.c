@@ -46,28 +46,31 @@ void notmain() {
 			unsigned int scancode = remove();
 			int i;
 			//Write start bit
-			/*gpio_pin_write(12, 0);
+			gpio_pin_write(CLOCK, 0);
+			gpio_pin_write(DATA, 0);
 			timer_wait_for(FLASH_TIME);
-			gpio_pin_write(21, 0);
-			timer_wait_for(FLASH_TIME);
-			gpio_pin_write(12, 1);*/
 			for(i = 0; i < 8; ++i){
-				gpio_pin_write(CLOCK, 0);
+				gpio_pin_write(CLOCK, 1);
 				int value = scancode & 1;
+				gfx_draw_letter(FIELD_COLOR, i*font_width(), 0, value+'0');
 				timer_wait_for(FLASH_TIME);
 				gpio_pin_write(DATA, value);
 				scancode = scancode>>1;
 				timer_wait_for(FLASH_TIME);
-				gpio_pin_write(CLOCK, 1);
+				gpio_pin_write(CLOCK, 0);
 				timer_wait_for(FLASH_TIME);
 			}
-/*			//Write parity (garbage) & end bit
+			//Write parity (garbage) & end bit
 			int j;
 			for(j = 0; j < 2; ++j){
-				gpio_pin_write(12, 0);
-				gpio_pin_write(21, 0);
-				gpio_pin_write(12, 1);
-			}*/
+				gpio_pin_write(CLOCK, 1);
+				gpio_pin_write(DATA, 0);
+				timer_wait_for(FLASH_TIME);
+				gpio_pin_write(CLOCK, 0);
+				timer_wait_for(FLASH_TIME);
+			}
+			gpio_pin_write(CLOCK, 1);
+			gpio_pin_write(DATA, 1);
 		}
 
 	}

@@ -35,12 +35,10 @@ void notmain() {
 	fieldInit();
 	//Display the codes received
 	while(1){
-		unsigned int clock = gpio_pin_read(23);
-		unsigned int data = gpio_pin_read(24);
-		char clock_char = (clock) ? '1' : '0';
-		char data_char = (data) ? '1' : '0';
-		gfx_draw_letter(FIELD_COLOR, 0, 0, clock_char);
-		gfx_draw_letter(FIELD_COLOR, 2*font_width(), 0, data_char);
+		if(keyboard_has_char()){
+			char c = keyboard_read_char();
+			gfx_draw_letter(FIELD_COLOR, 0, 0, c); 
+		}
 	}
 //  play_game();
 }
