@@ -45,11 +45,11 @@ void keyboard_init() {
   PUT32(INTERRUPT_DISABLE_2, 0xffffffff);
 
   // Put code to configure which GPIO events to trigger interrupts below
-  gpio_set_pullup(GPIO_PIN23);
+  //gpio_set_pullup(GPIO_PIN23);
   gpio_set_input(GPIO_PIN23); 
   gpio_detect_falling_edge(GPIO_PIN23); 
   gpio_set_input(GPIO_PIN24);
-  gpio_set_pullup(GPIO_PIN24);
+  //gpio_set_pullup(GPIO_PIN24);
   // Bit 52 in IRQ registers enables/disables all GPIO interrupts
   // Bit 52 is in the second register, so subtract 32 for index
   PUT32(INTERRUPT_ENABLE_2, (1 << (52 - 32))); 
@@ -57,6 +57,7 @@ void keyboard_init() {
 
 void int_handler(unsigned int pc){
 	//Check the events from the 23rd pin
+	led_toggle();
   gpio_check_and_clear_event(GPIO_PIN23);
   if(status){
 		if(count < 8){
@@ -75,7 +76,6 @@ void int_handler(unsigned int pc){
   if(count == 0 && gpio_pin_read(24) == 0){
     status = 1;
   }
-	//Also check pins 20 & 21
 }
 
 /* Return 1 if there are characters to read, 0 if no characters to read.

@@ -15,6 +15,8 @@
 #define SHIP_SPACE 10
 #define FLASH_TIME 500000
 #define MAX_SCORE 14
+#define CLOCK 21
+#define DATA 12
 
 //holds the grid of ships
 int field[144];
@@ -34,41 +36,40 @@ void ask_to_fire();
 void notmain() {
 	fieldInit();
 	//play_game();
-    unsigned int value = 1;
-	gpio_set_output(21);
-	gpio_set_output(20);
-	gpio_pin_write(21, 1);
-	gpio_pin_write(20, 1);
+  unsigned int value = 1;
+	gpio_set_output(DATA);
+	gpio_set_output(CLOCK);
+	gpio_pin_write(DATA, 1);
+	gpio_pin_write(CLOCK, 1);
 	while(1){
 		if(keyboard_has_char()){
 			unsigned int scancode = remove();
 			int i;
 			//Write start bit
-			gpio_pin_write(20, 0);
+			/*gpio_pin_write(12, 0);
+			timer_wait_for(FLASH_TIME);
 			gpio_pin_write(21, 0);
-			timer_wait_for(50000);
-			gpio_pin_write(20, 1);
+			timer_wait_for(FLASH_TIME);
+			gpio_pin_write(12, 1);*/
 			for(i = 0; i < 8; ++i){
-				gpio_pin_write(20, 0);
+				gpio_pin_write(CLOCK, 0);
 				int value = scancode & 1;
-				gpio_pin_write(21, value);
+				timer_wait_for(FLASH_TIME);
+				gpio_pin_write(DATA, value);
 				scancode = scancode>>1;
-				timer_wait_for(50000);
-				gpio_pin_write(20, 1);
+				timer_wait_for(FLASH_TIME);
+				gpio_pin_write(CLOCK, 1);
+				timer_wait_for(FLASH_TIME);
 			}
-			//Write parity (garbage) & end bit
+/*			//Write parity (garbage) & end bit
 			int j;
 			for(j = 0; j < 2; ++j){
-				gpio_pin_write(20, 0);
-				gpio_pin_write(21, 1);
-				gpio_pin_write(20, 1);
-			}
-			timer_wait_for(FLASH_TIME/5);
-			gpio_pin_write(20, 1);
-            remove();
-            remove();
-            
+				gpio_pin_write(12, 0);
+				gpio_pin_write(21, 0);
+				gpio_pin_write(12, 1);
+			}*/
 		}
+
 	}
 	/*unsigned int white = gfx_compute_color(128, 128, 128);
 	int y = 10;

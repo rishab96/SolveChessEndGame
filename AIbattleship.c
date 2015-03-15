@@ -33,105 +33,16 @@ void ask_to_fire();
 
 void notmain() {
 	fieldInit();
-	//gpio_set_input(23);
-	//gpio_set_input(24);
-    //gpio_set_input(20);
-    //int a = 0;
-    //int b = 0;
-    /*while(1) {
-        volatile int val = gpio_pin_read(24);
-        if(val) {
-            gfx_draw_letter(FIELD_COLOR,a*20,b,'y');
-        }
-        else {
-            gfx_draw_letter(FIELD_COLOR,a*20,b,'n');
-        }
-        if(gpio_pin_read(23)) {
-            gfx_draw_letter(FIELD_COLOR,a+20,b+20,'y');
-        }
-        else {
-            gfx_draw_letter(FIELD_COLOR,a+20,b+20,'n');
-        }
-    }
-    */
-    //program to read incoming bits:
-/*   while(gpio_pin_read(23)==0 || gpio_pin_read(24)==0) {
-        volatile int val = gpio_pin_read(24);
-        if(val) {
-            gfx_draw_letter(FIELD_COLOR,a*20,b,'y');
-        }
-        else {
-            gfx_draw_letter(FIELD_COLOR,a*20,b,'n');
-        }
-        if(gpio_pin_read(23)) {
-            gfx_draw_letter(FIELD_COLOR,a+20,b+20,'y');
-        }
-        else {
-            gfx_draw_letter(FIELD_COLOR,a+20,b+20,'n');
-        }
-      timer_wait_for(FLASH_TIME/2);  
-    }
-
-    
-
-    //begin reading
-    int count = 0;
-    while(count < 8) {
-        if(gpio_pin_read(23) == 0) {
-            if(gpio_pin_read(24)) {
-            gfx_draw_letter(FIELD_COLOR, count*font_width(), 200,'y');
-            }
-            else {
-                gfx_draw_letter(FIELD_COLOR, count*font_width(), 200, 'n');
-            }
-            timer_wait_for(FLASH_TIME/20);
-            count++;
-        }
-    }
-    return;
-  */  
-    
-    //21 = right laser = data
-    //20 = left laser = clock
-    //23 = clock left
-    //24 = data right
-	//gpio_set_output(21);
-	//gpio_set_output(20);
-	//gpio_pin_write(21, 1);
-	//gpio_pin_write(20, 1);
-	/*while(1){
-		if(keyboard_has_char()){
-			unsigned int scancode = remove();
-			int i;
-			//Write start bit
-			gpio_pin_write(20, 0);
-			gpio_pin_write(21, 0);
-			timer_wait_for(50000);
-			gpio_pin_write(20, 1);
-			for(i = 0; i < 8; ++i){
-				gpio_pin_write(20, 0);
-				int value = scancode & 1;
-				gpio_pin_write(21, value);
-				scancode = scancode>>1;
-				timer_wait_for(50000);
-				gpio_pin_write(20, 1);
-			}
-			//Write parity (garbage) & end bit
-			int j;
-			for(j = 0; j < 2; ++j){
-				gpio_pin_write(20, 0);
-				gpio_pin_write(21, 1);
-				gpio_pin_write(20, 1);
-			}
-			timer_wait_for(50000);
-			gpio_pin_write(20, 1);
-		}
-	}*/
-	/*unsigned int white = gfx_compute_color(128, 128, 128);
-	int y = 10;
-	y += 2*font_height();
-	play_game();*/
-    play_game();
+	//Display the codes received
+	while(1){
+		unsigned int clock = gpio_pin_read(23);
+		unsigned int data = gpio_pin_read(24);
+		char clock_char = (clock) ? '1' : '0';
+		char data_char = (data) ? '1' : '0';
+		gfx_draw_letter(FIELD_COLOR, 0, 0, clock_char);
+		gfx_draw_letter(FIELD_COLOR, 2*font_width(), 0, data_char);
+	}
+//  play_game();
 }
 
 void play_game() {
@@ -222,7 +133,6 @@ void ask_to_fire() {
 void fieldInit(){
   gpio_init();
   led_init();
-  timer_init();
   fb_init();
   keyboard_init();
   gfx_init();
@@ -269,7 +179,8 @@ void ask_for_ship(int size) {
                         break;
                 }
             }
-        }gfx_draw_string(FIELD_COLOR, 700, 0, "vert(v) or hor(h)?");
+        }
+				gfx_draw_string(FIELD_COLOR, 700, 0, "vert(v) or hor(h)?");
         int horizontal = 0;
         int vertical = 0;
         while(1) {
@@ -303,7 +214,7 @@ void ask_for_ship(int size) {
 void add_ships() {
         int ships_to_place[4] = {5,4,3,2};
         //ask for 1st ship
-		gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 5?");
+				gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 5?");
             //wait for valid input
         ask_for_ship(ships_to_place[0]);
         gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 4?");
