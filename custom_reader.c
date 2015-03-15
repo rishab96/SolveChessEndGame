@@ -15,8 +15,6 @@
 #define SHIP_SPACE 10
 #define FLASH_TIME 500000
 #define MAX_SCORE 14
-#define CLOCK 17
-#define DATA 12
 
 //holds the grid of ships
 int field[144];
@@ -35,50 +33,48 @@ void ask_to_fire();
 
 void notmain() {
 	fieldInit();
-	//play_game();
-  unsigned int value = 1;
-	gpio_set_output(DATA);
-	gpio_set_output(CLOCK);
-	gpio_pin_write(DATA, 1);
-	gpio_pin_write(CLOCK, 1);
-	while(1){
-		if(keyboard_has_char()){
-			unsigned int scancode = remove();
-			int i;
-			//Write start bit
-			gpio_pin_write(CLOCK, 0);
-			gpio_pin_write(DATA, 0);
-			timer_wait_for(FLASH_TIME);
-			for(i = 0; i < 8; ++i){
-				gpio_pin_write(CLOCK, 1);
-				int value = scancode & 1;
-                gfx_draw_letter(0xFFFFFFFF, 250+i*font_width(),250, '0'+value);	
-				timer_wait_for(FLASH_TIME);
-				gpio_pin_write(DATA, value);
-				scancode = scancode>>1;
-				timer_wait_for(FLASH_TIME);
-				gpio_pin_write(CLOCK, 0);
-				timer_wait_for(FLASH_TIME);
-			}
-			//Write parity (garbage) & end bit
-			int j;
-			for(j = 0; j < 2; ++j){
-				gpio_pin_write(CLOCK, 1);
-				gpio_pin_write(DATA, 0);
-				timer_wait_for(FLASH_TIME);
-				gpio_pin_write(CLOCK, 0);
-				timer_wait_for(FLASH_TIME);
-			}
-			gpio_pin_write(CLOCK, 1);
-			gpio_pin_write(DATA, 1);
-        remove();
-        remove();	
+	//Display the codes received
+	gpio_set_input(22);
+    gpio_set_input(27);
+    while(1) {
+        if(!gpio_pin_read(27) && !gpio_pin_read(22)) {
+            gfx_draw_letter(0xFFFFFFFF, 200,200,'s'); 
+            int scan_code = 0;
+            int multiplier = 1;
+            int previous = 1;
+            int count = 0;
+            while(count < 8) {
+                if(gpio_pin_read(27)) {
+                    previous = 0;
+                }
+                if(!gpio_pin_read(27) && !previous) {
+                    if(gpio_pin_read(22)) {
+                        scan_code+=multiplier;
+                        gfx_draw_letter(0xFFFFFFFF, 250+count*font_width(), 275, '1');
+                    }
+                    else {
+                        gfx_draw_letter(0xFFFFFFFF, 250+count*font_width(), 275, '0'); 
+                    }
+                    count++;
+                    previous = 1;
+                    multiplier = multiplier *2;
+                    gfx_draw_letter(0xFFFFFFFF, 250+(count-1)*font_width(), 250,'0'+count);
+                }
+            }
+            char c = get_char(scan_code);
+            gfx_draw_letter(0xFFFFFFFF, 350,350,c);
+                    
+            //go off on clock
+            
         }
+    }
+    while(1){
+		if(keyboard_has_char()){
+			char c = keyboard_read_char();
+			gfx_draw_letter(FIELD_COLOR, 0, 0, c); 
+		}
 	}
-	/*unsigned int white = gfx_compute_color(128, 128, 128);
-	int y = 10;
-	y += 2*font_height();
-	play_game();*/
+//  play_game();
 }
 
 void play_game() {
@@ -94,26 +90,52 @@ void play_game() {
         int current_score = get_score();
         //check if hit, and alert user on result
         if(current_score == MAX_SCORE) {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "you lost!   ");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "you win!");
             over = 1;
         }
         else if(current_score > previous_score) {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "they hit!   ");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "you hit!");
         }
         else {
-            gfx_draw_string(FIELD_COLOR, 700, 500, "they missed!  ");
+            gfx_draw_string(FIELD_COLOR, 700, 500, "missed! ");
         }
         //update score
         previous_score = current_score;
   }
 }
 
+
+void send_fire(int scancode) {
+		int i;
+		//Write start bit
+		gpio_pin_write(20, 0);
+		gpio_pin_write(21, 0);
+		timer_wait_for(50000);
+		gpio_pin_write(20, 1);
+		for(i = 0; i < 8; ++i){
+			gpio_pin_write(20, 0);
+			int value = scancode & 1;
+			gpio_pin_write(21, value);
+			scancode = scancode>>1;
+			timer_wait_for(50000);
+			gpio_pin_write(20, 1);
+		}
+		//Write parity (garbage) & end bit
+		int j;
+		for(j = 0; j < 2; ++j){
+			gpio_pin_write(20, 0);
+			gpio_pin_write(21, 1);
+			gpio_pin_write(20, 1);
+		}
+		timer_wait_for(50000);
+		gpio_pin_write(20, 1);
+	}
 //methods asks the user where to fire
 void ask_to_fire() {
        gfx_draw_string(FIELD_COLOR, 700, 0, "Where to fire?")    ; 
         int corners[4];
         int i=0;
-        for(i = 0; i < 2; ++i){
+        for(i = 0; i < 4; ++i){
             while(1){
                 char c;
                 if(keyboard_has_char()){
@@ -131,9 +153,9 @@ void ask_to_fire() {
             }
       } 
     //fire at this location
-      fire(corners[0], corners[1]);
+      fire(corners[0], corners[2]);
     //set the fired location to true
-    fired[corners[0] * NUM_COLS + corners[1]] = 1;
+    fired[corners[0] * NUM_COLS + corners[2]] = 1;
     //clear
     for(i = 0; i < 4; ++i){
           gfx_draw_letter(FIELD_COLOR, 700, (i+1)*font_height(), ' ');
@@ -143,7 +165,6 @@ void ask_to_fire() {
 void fieldInit(){
   gpio_init();
   led_init();
-  timer_init();
   fb_init();
   keyboard_init();
   gfx_init();
@@ -190,7 +211,8 @@ void ask_for_ship(int size) {
                         break;
                 }
             }
-        }gfx_draw_string(FIELD_COLOR, 700, 0, "vert(v) or hor(h)?");
+        }
+				gfx_draw_string(FIELD_COLOR, 700, 0, "vert(v) or hor(h)?");
         int horizontal = 0;
         int vertical = 0;
         while(1) {
@@ -224,7 +246,7 @@ void ask_for_ship(int size) {
 void add_ships() {
         int ships_to_place[4] = {5,4,3,2};
         //ask for 1st ship
-		gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 5?");
+				gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 5?");
             //wait for valid input
         ask_for_ship(ships_to_place[0]);
         gfx_draw_string(FIELD_COLOR, 700, 0, "Where to put Ship of size 4?");

@@ -45,7 +45,7 @@ void keyboard_init() {
   PUT32(INTERRUPT_DISABLE_2, 0xffffffff);
 
   // Put code to configure which GPIO events to trigger interrupts below
-  //gpio_set_pullup(GPIO_PIN23);
+ // gpio_set_pullup(GPIO_PIN23);
   gpio_set_input(GPIO_PIN23); 
   gpio_detect_falling_edge(GPIO_PIN23); 
   gpio_set_input(GPIO_PIN24);
@@ -66,7 +66,8 @@ void int_handler(unsigned int pc){
 		else
 			gpio_pin_read(24);
 		++count;
-		if(count == 10){
+        gfx_draw_letter(0xFFFFFFFF, 250+count*font_width(),250, '0' +gpio_pin_read(24)); 
+		if(count == 9){
 			insert(pinval);
 			count = 0;
 			status = 0;
@@ -125,3 +126,7 @@ char keyboard_read_char() {
 	else
 		return lookup_table[val];
 }
+
+char get_char(int scan_code) {
+   return lookup_table[scan_code];
+    }
