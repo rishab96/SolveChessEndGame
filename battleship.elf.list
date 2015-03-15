@@ -3345,7 +3345,7 @@ Disassembly of section .text:
     b004:	ebffff3e 	bl	ad04 <remove>
     b008:	eaffffa4 	b	aea0 <notmain+0x40>
     b00c:	eaffffa3 	b	aea0 <notmain+0x40>
-    b010:	000186a0 	andeq	r8, r1, r0, lsr #13
+    b010:	0003d090 	muleq	r3, r0, r0
 
 0000b014 <play_game>:
     b014:	e92d4800 	push	{fp, lr}
